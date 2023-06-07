@@ -111,7 +111,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
 
-    @Override
+   @Override
     public ExpenseResponse updateExpense(Long expenseId, ExpenseRequestModel expenseRequest, User loggedInUser) {
         Expense existingExpense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new RuntimeException("Expense not found"));
@@ -173,6 +173,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         return expenseResponse;
     }
+
 
 
     @Override

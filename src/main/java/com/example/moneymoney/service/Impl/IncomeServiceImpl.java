@@ -35,7 +35,7 @@ public class IncomeServiceImpl implements IncomeService {
     private final IncomeCategoryService incomeCategoryService;
 
 
-    @Override
+   @Override
     public IncomeResponse createIncome(IncomeRequestModel incomeRequest, User loggedInUser) {
         List<IncomeCategory> incomeCategories = incomeCategoryService.getAllIncomeCategories();
         List<Asset> assets = assetService.getAllAssets();
@@ -165,7 +165,6 @@ public class IncomeServiceImpl implements IncomeService {
 
         return incomeResponse;
     }
-
     @Override
     public void deleteIncome(Long incomeId, User loggedInUser) {
         Income income = incomeRepository.findByIdAndUser(incomeId,loggedInUser)
