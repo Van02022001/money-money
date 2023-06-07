@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer {
 						HttpMethod.OPTIONS.name(), HttpMethod.DELETE.name())
 				.allowedHeaders("*")
 				.allowedOrigins("*", "https://money-money.vercel.app/", "https://money-money.vercel.app/**", "http://localhost:3000/**",
-					       "https://money-money.azurewebsites.net/**");
+					       "https://money-money.azurewebsites.net/**", "https://money-money.azurewebsites.net/");
 	}
 
 
