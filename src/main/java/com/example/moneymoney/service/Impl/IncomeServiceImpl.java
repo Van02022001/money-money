@@ -34,7 +34,7 @@ public class IncomeServiceImpl implements IncomeService {
     private final IncomeCategoryService incomeCategoryService;
 
 
-    @Override
+   @Override
     public IncomeResponse createIncome(IncomeRequestModel incomeRequest, User loggedInUser) {
         List<IncomeCategory> incomeCategories = incomeCategoryService.getAllIncomeCategories();
         List<Asset> assets = assetService.getAllAssets();
@@ -47,11 +47,27 @@ public class IncomeServiceImpl implements IncomeService {
             throw new IllegalArgumentException("Assets cannot be empty");
         }
 
-        // Lấy Income Category đầu tiên từ danh sách Income Categories
-        IncomeCategory incomeCategory = incomeCategories.get(0);
+        // Tìm kiếm Income Category dựa trên tên từ request
+        Optional<IncomeCategory> incomeCategoryOptional = incomeCategories.stream()
+                .filter(category -> category.getIncomeCategoryName().equalsIgnoreCase(incomeRequest.getIncomeCategoryName()))
+                .findFirst();
 
-        // Lấy Asset đầu tiên từ danh sách Assets
-        Asset asset = assets.get(0);
+        if (incomeCategoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Income category not found");
+        }
+
+        IncomeCategory incomeCategory = incomeCategoryOptional.get();
+
+        // Tìm kiếm Asset dựa trên tên từ request
+        Optional<Asset> assetOptional = assets.stream()
+                .filter(asset -> asset.getAssetName().equalsIgnoreCase(incomeRequest.getAssetName()))
+                .findFirst();
+
+        if (assetOptional.isEmpty()) {
+            throw new IllegalArgumentException("Asset not found");
+        }
+
+        Asset asset = assetOptional.get();
 
         Income income = new Income();
         income.setUser(loggedInUser);
@@ -102,11 +118,27 @@ public class IncomeServiceImpl implements IncomeService {
             throw new IllegalArgumentException("Assets cannot be empty");
         }
 
-        // Lấy Income Category đầu tiên từ danh sách Income Categories
-        IncomeCategory incomeCategory = incomeCategories.get(0);
+        // Tìm kiếm Income Category dựa trên tên từ request
+        Optional<IncomeCategory> incomeCategoryOptional = incomeCategories.stream()
+                .filter(category -> category.getIncomeCategoryName().equalsIgnoreCase(incomeRequest.getIncomeCategoryName()))
+                .findFirst();
 
-        // Lấy Asset đầu tiên từ danh sách Assets
-        Asset asset = assets.get(0);
+        if (incomeCategoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Income category not found");
+        }
+
+        IncomeCategory incomeCategory = incomeCategoryOptional.get();
+
+        // Tìm kiếm Asset dựa trên tên từ request
+        Optional<Asset> assetOptional = assets.stream()
+                .filter(asset -> asset.getAssetName().equalsIgnoreCase(incomeRequest.getAssetName()))
+                .findFirst();
+
+        if (assetOptional.isEmpty()) {
+            throw new IllegalArgumentException("Asset not found");
+        }
+
+        Asset asset = assetOptional.get();
 
         existingIncome.setIncomeCategory(incomeCategory);
         existingIncome.setDate(incomeRequest.getDate());
@@ -132,7 +164,6 @@ public class IncomeServiceImpl implements IncomeService {
 
         return incomeResponse;
     }
-
     @Override
     public void deleteIncome(Long incomeId, User loggedInUser) {
         Income income = incomeRepository.findByIdAndUser(incomeId,loggedInUser)
