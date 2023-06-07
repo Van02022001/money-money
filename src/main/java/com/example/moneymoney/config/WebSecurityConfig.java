@@ -116,7 +116,7 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
        return http
                 .cors()
-                .disable()
+                .and()
                 .csrf()
                 .disable()
                 .formLogin()
