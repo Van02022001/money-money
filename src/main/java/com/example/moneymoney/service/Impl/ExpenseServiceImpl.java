@@ -30,7 +30,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public ExpenseResponse createExpense(ExpenseRequestModel expenseRequest, User loggedInUser) {
-        List<ExpenseCategory> expenseCategories =  expenseCategoryService.getAllExpenseCategories();
+        List<ExpenseCategory> expenseCategories = expenseCategoryService.getAllExpenseCategories();
         List<Asset> assets = assetService.getAllAssets();
 
         if (expenseCategories.isEmpty()) {
@@ -41,11 +41,27 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new IllegalArgumentException("Assets cannot be empty");
         }
 
-        // Lấy Expense Category đầu tiên từ danh sách Expense Categories
-        ExpenseCategory expenseCategory = expenseCategories.get(0);
+        // Tìm kiếm Expense Category dựa trên tên từ request
+        Optional<ExpenseCategory> expenseCategoryOptional = expenseCategories.stream()
+                .filter(category -> category.getExpenseCategoryName().equalsIgnoreCase(expenseRequest.getExpenseCategoryName()))
+                .findFirst();
 
-        // Lấy Asset đầu tiên từ danh sách Assets
-        Asset asset = assets.get(0);
+        if (expenseCategoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Expense category not found");
+        }
+
+        ExpenseCategory expenseCategory = expenseCategoryOptional.get();
+
+        // Tìm kiếm Asset dựa trên tên từ request
+        Optional<Asset> assetOptional = assets.stream()
+                .filter(asset -> asset.getAssetName().equalsIgnoreCase(expenseRequest.getAssetName()))
+                .findFirst();
+
+        if (assetOptional.isEmpty()) {
+            throw new IllegalArgumentException("Asset not found");
+        }
+
+        Asset asset = assetOptional.get();
 
         Expense expense = new Expense();
         expense.setUser(loggedInUser);
@@ -95,13 +111,12 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
 
-    @Override
+   @Override
     public ExpenseResponse updateExpense(Long expenseId, ExpenseRequestModel expenseRequest, User loggedInUser) {
         Expense existingExpense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new RuntimeException("Expense not found"));
 
-
-        List<ExpenseCategory> expenseCategories =  expenseCategoryService.getAllExpenseCategories();
+        List<ExpenseCategory> expenseCategories = expenseCategoryService.getAllExpenseCategories();
         List<Asset> assets = assetService.getAllAssets();
 
         if (expenseCategories.isEmpty()) {
@@ -112,13 +127,27 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new IllegalArgumentException("Assets cannot be empty");
         }
 
+        // Tìm kiếm Expense Category dựa trên tên từ request
+        Optional<ExpenseCategory> expenseCategoryOptional = expenseCategories.stream()
+                .filter(category -> category.getExpenseCategoryName().equalsIgnoreCase(expenseRequest.getExpenseCategoryName()))
+                .findFirst();
 
+        if (expenseCategoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Expense category not found");
+        }
 
-        // Lấy Expense Category đầu tiên từ danh sách Expense Categories
-        ExpenseCategory expenseCategory = expenseCategories.get(0);
+        ExpenseCategory expenseCategory = expenseCategoryOptional.get();
 
-        // Lấy Asset đầu tiên từ danh sách Assets
-        Asset asset = assets.get(0);
+        // Tìm kiếm Asset dựa trên tên từ request
+        Optional<Asset> assetOptional = assets.stream()
+                .filter(asset -> asset.getAssetName().equalsIgnoreCase(expenseRequest.getAssetName()))
+                .findFirst();
+
+        if (assetOptional.isEmpty()) {
+            throw new IllegalArgumentException("Asset not found");
+        }
+
+        Asset asset = assetOptional.get();
 
         existingExpense.setExpenseCategory(expenseCategory);
         existingExpense.setDate(expenseRequest.getDate());
@@ -144,6 +173,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         return expenseResponse;
     }
+
 
 
     @Override
