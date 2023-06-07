@@ -32,9 +32,6 @@ public class Asset {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "value", nullable = false)
-    private BigDecimal value;
-
 
 
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL)
@@ -46,6 +43,6 @@ public class Asset {
     private List<Income> incomes;
 
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL)
-    private List<User> user;
+    private List<UserAsset> userAssets;
 
 }

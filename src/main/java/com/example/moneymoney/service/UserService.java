@@ -2,10 +2,8 @@ package com.example.moneymoney.service;
 
 import com.example.moneymoney.entity.User;
 import com.example.moneymoney.entity.VerificationToken;
-import com.example.moneymoney.model.requestmodel.LoginModel;
-import com.example.moneymoney.model.requestmodel.LogoutModel;
-import com.example.moneymoney.model.requestmodel.RefreshTokenModel;
-import com.example.moneymoney.model.requestmodel.SignUpModel;
+import com.example.moneymoney.model.requestmodel.*;
+import com.example.moneymoney.model.responsemodel.PurchaseResult;
 import com.example.moneymoney.utils.ResponseObject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -41,4 +39,10 @@ public interface UserService {
 
     ResponseEntity<ResponseObject> refreshAccessToken(HttpServletRequest request, RefreshTokenModel refreshTokenModel);
     ResponseEntity<ResponseObject> logout(HttpServletRequest request, LogoutModel logoutModel);
+
+    User findUserById(Long id);
+
+
+    PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, User loggedInUser);
+    boolean isPremiumUser(User user);
 }

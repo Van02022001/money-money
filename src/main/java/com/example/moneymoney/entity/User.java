@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.List;
 
 
 @Entity
@@ -43,9 +44,8 @@ public class User {
     private Role role;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "asset_id")
-    private Asset asset;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserAsset> userAssets;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private PremiumSubscription premiumSubscription;

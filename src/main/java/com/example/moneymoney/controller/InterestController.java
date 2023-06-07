@@ -1,7 +1,10 @@
 package com.example.moneymoney.controller;
 
+import com.example.moneymoney.entity.User;
+import com.example.moneymoney.jwt.userprincipal.Principal;
 import com.example.moneymoney.model.requestmodel.CalculateInterestRequest;
 import com.example.moneymoney.service.InterestService;
+import com.example.moneymoney.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,8 @@ import java.util.List;
 public class InterestController {
 
     private final InterestService interestService;
+
+    private final UserService userService;
 
     @GetMapping("/interest-rates")
     public ResponseEntity<List<BigDecimal>> getInterestRates() {
@@ -51,5 +56,8 @@ public class InterestController {
 
         return ResponseEntity.ok(expectedInterest);
     }
+
+
+
 
 }

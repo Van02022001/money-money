@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,11 +48,27 @@ public class IncomeServiceImpl implements IncomeService {
             throw new IllegalArgumentException("Assets cannot be empty");
         }
 
-        // Lấy Income Category đầu tiên từ danh sách Income Categories
-        IncomeCategory incomeCategory = incomeCategories.get(0);
+        // Tìm kiếm Income Category dựa trên tên từ request
+        Optional<IncomeCategory> incomeCategoryOptional = incomeCategories.stream()
+                .filter(category -> category.getIncomeCategoryName().equalsIgnoreCase(incomeRequest.getIncomeCategoryName()))
+                .findFirst();
 
-        // Lấy Asset đầu tiên từ danh sách Assets
-        Asset asset = assets.get(0);
+        if (incomeCategoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Income category not found");
+        }
+
+        IncomeCategory incomeCategory = incomeCategoryOptional.get();
+
+        // Tìm kiếm Asset dựa trên tên từ request
+        Optional<Asset> assetOptional = assets.stream()
+                .filter(asset -> asset.getAssetName().equalsIgnoreCase(incomeRequest.getAssetName()))
+                .findFirst();
+
+        if (assetOptional.isEmpty()) {
+            throw new IllegalArgumentException("Asset not found");
+        }
+
+        Asset asset = assetOptional.get();
 
         Income income = new Income();
         income.setUser(loggedInUser);
@@ -102,11 +119,27 @@ public class IncomeServiceImpl implements IncomeService {
             throw new IllegalArgumentException("Assets cannot be empty");
         }
 
-        // Lấy Income Category đầu tiên từ danh sách Income Categories
-        IncomeCategory incomeCategory = incomeCategories.get(0);
+        // Tìm kiếm Income Category dựa trên tên từ request
+        Optional<IncomeCategory> incomeCategoryOptional = incomeCategories.stream()
+                .filter(category -> category.getIncomeCategoryName().equalsIgnoreCase(incomeRequest.getIncomeCategoryName()))
+                .findFirst();
 
-        // Lấy Asset đầu tiên từ danh sách Assets
-        Asset asset = assets.get(0);
+        if (incomeCategoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Income category not found");
+        }
+
+        IncomeCategory incomeCategory = incomeCategoryOptional.get();
+
+        // Tìm kiếm Asset dựa trên tên từ request
+        Optional<Asset> assetOptional = assets.stream()
+                .filter(asset -> asset.getAssetName().equalsIgnoreCase(incomeRequest.getAssetName()))
+                .findFirst();
+
+        if (assetOptional.isEmpty()) {
+            throw new IllegalArgumentException("Asset not found");
+        }
+
+        Asset asset = assetOptional.get();
 
         existingIncome.setIncomeCategory(incomeCategory);
         existingIncome.setDate(incomeRequest.getDate());

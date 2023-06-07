@@ -65,7 +65,9 @@ public class WebSecurityConfig {
             "api/v1/money-money/users/expenses/**",
             "api/v1/money-money/users/incomes/**",
             "api/v1/money-money/users/profits/**",
-            "api/v1/money-money/users/interests/**"
+            "api/v1/money-money/users/interests/**",
+            "api/v1/money-money/users/premiums/**",
+            "api/v1/money-money/users/users-asset/**"
     };
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
@@ -116,7 +118,7 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
        return http
                 .cors()
-                .disable()
+                .and()
                 .csrf()
                 .disable()
                 .formLogin()

@@ -10,6 +10,6 @@ import java.util.List;
 public interface AssetRepository extends JpaRepository<Asset, Long> {
     Asset findByAssetName(String assetName);
 
-
+    Asset findAssetByAssetId(Long id);
     List<Asset> findAll();
 }

@@ -1,22 +1,15 @@
 package com.example.moneymoney.service.Impl;
 
-import com.example.moneymoney.entity.PasswordResetToken;
-import com.example.moneymoney.entity.RefreshToken;
-import com.example.moneymoney.entity.User;
-import com.example.moneymoney.entity.VerificationToken;
+import com.example.moneymoney.entity.*;
 import com.example.moneymoney.enums.AuthProvider;
 import com.example.moneymoney.enums.Role;
 import com.example.moneymoney.exception.UserNotFoundException;
 import com.example.moneymoney.jwt.*;
 import com.example.moneymoney.jwt.userprincipal.Principal;
-import com.example.moneymoney.model.requestmodel.LoginModel;
-import com.example.moneymoney.model.requestmodel.LogoutModel;
-import com.example.moneymoney.model.requestmodel.RefreshTokenModel;
-import com.example.moneymoney.model.requestmodel.SignUpModel;
+import com.example.moneymoney.model.requestmodel.*;
+import com.example.moneymoney.model.responsemodel.PurchaseResult;
 import com.example.moneymoney.model.responsemodel.RefreshTokenResponse;
-import com.example.moneymoney.repository.PasswordTokenRepository;
-import com.example.moneymoney.repository.UserRepository;
-import com.example.moneymoney.repository.VerificationRepository;
+import com.example.moneymoney.repository.*;
 import com.example.moneymoney.service.UserService;
 import com.example.moneymoney.utils.PrincipalDTO;
 import com.example.moneymoney.utils.ResponseObject;
@@ -37,10 +30,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,6 +44,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
+    @Autowired
+    private AssetRepository assetRepository;
     private final String companyEmail = "qvanwork@outlook.com.vn";
     @Autowired
     private UserRepository userRepository;
@@ -72,7 +69,9 @@ public class UserServiceImpl implements UserService {
     private RefreshTokenProvider refreshTokenProvider;
 
 
+    private final UserAssetRepository userAssetRepository;
     private final AuthenticationManager authenticationManager;
+    private final PremiumSubscriptionRepository premiumSubscriptionRepository;
     @Autowired
     CacheManager cacheManager;
     @Override
@@ -248,6 +247,57 @@ public class UserServiceImpl implements UserService {
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseObject(HttpStatus.ACCEPTED.toString(), "Logout success!", null, new RefreshTokenResponse(null, null)));
     }
+
+    @Override
+    public User findUserById(Long id) {
+        return userRepository.findUserById(id);
+    }
+
+    @Override
+    public PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, User loggedInUser) {
+        // Validate purchasePremiumRequest và xử lý logic mua gói Premium
+        User user = userRepository.findUserByEmail(loggedInUser.getEmail());
+
+        if (user.getPremiumSubscription() != null && user.getPremiumSubscription().getEndDate().isAfter(LocalDateTime.now())) {
+            return new PurchaseResult(HttpStatus.OK.toString(), "already_premium");
+        }
+
+        Asset asset = assetRepository.findAssetByAssetId(purchasePremiumRequest.getAssetId());
+
+        if (asset == null) {
+            return new PurchaseResult(HttpStatus.OK.toString(), "asset_not_found");
+        }
+
+        UserAsset userAsset = userAssetRepository.findUserAssetByUserAndAsset(user, asset);
+
+        if (userAsset == null || userAsset.getValue().compareTo(purchasePremiumRequest.getPremiumPrice()) < 0) {
+            return new PurchaseResult(HttpStatus.OK.toString(), "insufficient_funds");
+        }
+
+        // Trừ số tiền trong userAsset
+        userAsset.setValue(userAsset.getValue().subtract(purchasePremiumRequest.getPremiumPrice()));
+        userAssetRepository.save(userAsset);
+
+        // Tạo mới PremiumSubscription
+        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate = startDate.plusMonths(1);
+        PremiumSubscription premiumSubscription = PremiumSubscription.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .user(user)
+                .build();
+        premiumSubscriptionRepository.save(premiumSubscription);
+
+        return new PurchaseResult(HttpStatus.ACCEPTED.toString(), "purchase_success");
+    }
+
+    @Override
+    public boolean isPremiumUser(User user) {
+        PremiumSubscription premiumSubscription = user.getPremiumSubscription();
+        return premiumSubscription != null && premiumSubscription.getEndDate().isAfter(LocalDateTime.now());
+    }
+
+
     private void clearRefreshTokenCache(String refreshToken) {
         boolean result = cacheManager.getCache("refreshToken").evictIfPresent(refreshToken);
         if (result) {
@@ -264,5 +314,7 @@ public class UserServiceImpl implements UserService {
             log.error("Fail clear account " + username + " from cache");
         }
     }
+
+
 
 }
