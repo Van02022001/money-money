@@ -175,7 +175,7 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public List<Income> getListIncome(User loggedInUser) {
-        return incomeRepository.findAllByUser(loggedInUser);
+        return incomeRepository.findAllByUserOrderByDateDesc(loggedInUser);
     }
 
 

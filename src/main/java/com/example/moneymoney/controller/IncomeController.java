@@ -9,6 +9,8 @@ import com.example.moneymoney.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -74,10 +76,13 @@ public class IncomeController {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
         List<Income> incomes = incomeService.getListIncome(loggedInUser);
-        List<IncomeResponse> expenseResponses = incomes.stream()
-                .sorted(Comparator.comparing(Income::getDate).reversed())
-                .map(this::mapToIncomeResponse)
-                .collect(Collectors.toList());
+        ModelMapper modelMapper = new ModelMapper();
+        List<IncomeResponse> expenseResponses = modelMapper.map(incomes, new TypeToken<List<IncomeResponse>>() {
+        }.getType());
+//        List<IncomeResponse> expenseResponses = incomes.stream()
+//                .sorted(Comparator.comparing(Income::getDate).reversed())
+//                .map(this::mapToIncomeResponse)
+//                .collect(Collectors.toList());
         return ResponseEntity.ok(expenseResponses);
     }
 

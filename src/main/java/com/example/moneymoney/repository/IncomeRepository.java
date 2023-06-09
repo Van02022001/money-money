@@ -20,7 +20,8 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
 
     Optional<Income> findByIdAndUser(Long expenseId, User user);
 
-    List<Income> findAllByUser(User user);
+    List<Income> findAllByUserOrderByDateDesc(User user);
+
 
     @Query("SELECT SUM(i.amount) FROM Income i WHERE DATE(i.date) = :date AND i.user = :loggedInUser")
     BigDecimal getTotalAmountByDay(@Param("date") Date date, @Param("loggedInUser") User loggedInUser);
