@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @Getter
 public class ExpenseResponse {
+    private int id;
     private String expenseCategoryName;
     private Timestamp date;
     private BigDecimal amount;
