@@ -5,6 +5,7 @@ import com.example.moneymoney.entity.Expense;
 import com.example.moneymoney.entity.User;
 import com.example.moneymoney.model.requestmodel.ExpenseRequestModel;
 import com.example.moneymoney.model.responsemodel.ExpenseResponse;
+import com.example.moneymoney.model.responsemodel.IncomeResponse;
 import com.example.moneymoney.service.ExpenseService;
 import com.example.moneymoney.service.UserService;
 import com.example.moneymoney.utils.ResponseObject;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,10 +81,13 @@ public class ExpenseController {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
         List<Expense> expenses = expenseService.getListExpense(loggedInUser);
-        List<ExpenseResponse> expenseResponses = expenses.stream()
-                .sorted(Comparator.comparing(Expense::getDate).reversed())
-                .map(this::mapToExpenseResponse)
-                .collect(Collectors.toList());
+        ModelMapper modelMapper = new ModelMapper();
+        List<ExpenseResponse> expenseResponses = modelMapper.map(expenses, new TypeToken<List<ExpenseResponse>>() {
+        }.getType());
+//        List<ExpenseResponse> expenseResponses = expenses.stream()
+//                .sorted(Comparator.comparing(Expense::getDate).reversed())
+//                .map(this::mapToExpenseResponse)
+//                .collect(Collectors.toList());
         return ResponseEntity.ok(expenseResponses);
     }
 

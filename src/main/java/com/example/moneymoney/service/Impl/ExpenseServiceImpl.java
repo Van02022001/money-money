@@ -178,7 +178,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<Expense> getListExpense(User loggedInUser) {
-        return expenseRepository.findAllByUser(loggedInUser);
+        return expenseRepository.findAllByUserOrderByDateDesc(loggedInUser);
     }
 
 
