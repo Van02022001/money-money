@@ -21,7 +21,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     Optional<Expense> findByIdAndUser(Long expenseId, User user);
 
-    List<Expense> findAllByUser(User user);
+    List<Expense> findAllByUserOrderByDateDesc(User user);
 
     @Query("SELECT SUM(e.amount) FROM Expense e WHERE DATE(e.date) = :date AND e.user = :loggedInUser")
     BigDecimal getTotalAmountByDay(@Param("date") Date date, @Param("loggedInUser") User loggedInUser);
