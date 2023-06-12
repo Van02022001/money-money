@@ -47,7 +47,7 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
             @Param("endDate") Timestamp endDate,
             @Param("loggedInUser") User loggedInUser);
 
-    List<Income> findAllByUserAndDateBetweenOrderByDateDesc(User user, LocalDate startDate, LocalDate endDate);
+    List<Income> findAllByUserAndDateBetweenOrderByDateDesc(User user, Timestamp startDate, Timestamp endDate);
 
 
 

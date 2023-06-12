@@ -185,7 +185,9 @@ public class IncomeServiceImpl implements IncomeService {
     public List<Income> getListIncomeByMonthAndYear(User loggedInUser, int month, int year) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
-        return incomeRepository.findAllByUserAndDateBetweenOrderByDateDesc(loggedInUser, startDate, endDate);
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atStartOfDay().plusDays(1));
+        return incomeRepository.findAllByUserAndDateBetweenOrderByDateDesc(loggedInUser, startTimestamp, endTimestamp);
     }
 
 

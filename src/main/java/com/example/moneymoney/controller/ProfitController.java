@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -105,11 +102,11 @@ public class ProfitController {
         return ResponseEntity.ok(totalProfit);
     }
 
-    @GetMapping("/starting-balance-of-month")
+    @GetMapping("/starting-balance/{month}/{year}")
     @Operation(summary = "For getting the starting balance of a specific month")
     public ResponseEntity<BigDecimal> getStartingBalanceOfMonth(
-            @RequestParam("month") int month,
-            @RequestParam("year") int year,
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
             Principal principal) {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
@@ -117,10 +114,10 @@ public class ProfitController {
         return ResponseEntity.ok(startingBalance);
     }
 
-    @GetMapping("/starting-balance-of-year")
+    @GetMapping("/starting-balance/{year}")
     @Operation(summary = "For getting the starting balance of a specific year")
     public ResponseEntity<BigDecimal> getStartingBalanceOfYear(
-            @RequestParam("year") int year,
+            @PathVariable("year") int year,
             Principal principal) {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
@@ -129,11 +126,11 @@ public class ProfitController {
 
         return ResponseEntity.ok(startingBalance);
     }
-    @GetMapping("/ending-balance-of-month")
+    @GetMapping("/ending-balance/{month}/{year}")
     @Operation(summary = "For getting the ending balance of a specific month")
     public ResponseEntity<BigDecimal> getEndingBalanceOfMonth(
-            @RequestParam("month") int month,
-            @RequestParam("year") int year,
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
             Principal principal) {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
@@ -145,11 +142,11 @@ public class ProfitController {
         return ResponseEntity.ok(endingBalance);
     }
 
-    @GetMapping("/profit-of-month")
-    @Operation(summary = "Get the profit of a specific month")
+    @GetMapping("/total-profits-by-month/{month}/{year}")
+    @Operation(summary = "Get the profit of a specific month in year")
     public ResponseEntity<BigDecimal> getProfitOfMonth(
-            @RequestParam("month") int month,
-            @RequestParam("year") int year,
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
             Principal principal) {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);

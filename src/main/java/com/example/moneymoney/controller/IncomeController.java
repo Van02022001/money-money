@@ -94,14 +94,19 @@ public class IncomeController {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
         List<Income> incomes = incomeService.getListIncomeByMonthAndYear(loggedInUser, month, year);
-        ModelMapper modelMapper = new ModelMapper();
-        List<IncomeResponse> incomeResponses = modelMapper.map(incomes, new TypeToken<List<IncomeResponse>>() {}.getType());
+        //ModelMapper modelMapper = new ModelMapper();
+                List<IncomeResponse> incomeResponses = incomes.stream()
+                .sorted(Comparator.comparing(Income::getDate).reversed())
+                .map(this::mapToIncomeResponse)
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(incomeResponses);
     }
 
 
     private IncomeResponse mapToIncomeResponse(Income income) {
         IncomeResponse incomeResponse = new IncomeResponse();
+        incomeResponse.setId(income.getId());
         incomeResponse.setIncomeCategoryName(income.getIncomeCategory().getIncomeCategoryName());
         incomeResponse.setDate(income.getDate());
         incomeResponse.setAmount(income.getAmount());
@@ -184,8 +189,8 @@ public class IncomeController {
     }
 
 
-    @GetMapping("/total/{month}/{year}")
-    @Operation(summary = "Get total income's amount by month")
+    @GetMapping("/total-incomes-by-month/{month}/{year}")
+    @Operation(summary = "Get total income's amount by month and year")
     public ResponseEntity<BigDecimal> getTotalIncomeByMonth(
             @PathVariable("month") int month,
             @PathVariable("year") int year,

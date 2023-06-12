@@ -81,16 +81,15 @@ public class ExpenseController {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
         List<Expense> expenses = expenseService.getListExpense(loggedInUser);
-        ModelMapper modelMapper = new ModelMapper();
-        List<ExpenseResponse> expenseResponses = modelMapper.map(expenses, new TypeToken<List<ExpenseResponse>>() {
-        }.getType());
-//        List<ExpenseResponse> expenseResponses = expenses.stream()
-//                .sorted(Comparator.comparing(Expense::getDate).reversed())
-//                .map(this::mapToExpenseResponse)
-//                .collect(Collectors.toList());
+        //ModelMapper modelMapper = new ModelMapper();
+
+        List<ExpenseResponse> expenseResponses = expenses.stream()
+                .sorted(Comparator.comparing(Expense::getDate).reversed())
+                .map(this::mapToExpenseResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(expenseResponses);
     }
-    @GetMapping("/total/{month}/{year}")
+    @GetMapping("/{month}/{year}")
     @Operation(summary = "Get list of expenses by month and year")
     public ResponseEntity<List<ExpenseResponse>> getListExpenseByMonthAndYear(
             @PathVariable("month") int month,
@@ -111,6 +110,7 @@ public class ExpenseController {
 
     private ExpenseResponse mapToExpenseResponse(Expense expense) {
         ExpenseResponse expenseResponse = new ExpenseResponse();
+        expenseResponse.setId(expense.getId());
         expenseResponse.setExpenseCategoryName(expense.getExpenseCategory().getExpenseCategoryName());
         expenseResponse.setDate(expense.getDate());
         expenseResponse.setAmount(expense.getAmount());
@@ -193,11 +193,11 @@ public class ExpenseController {
     }
 
 
-    @GetMapping("/total-expenses-by-month")
+    @GetMapping("/total-expenses-by-month/{month}/{year}")
     @Operation(summary = "For getting total expense's amount by month")
     public ResponseEntity<BigDecimal> getTotalAmountByMonth(
-            @RequestParam("month") int month,
-            @RequestParam("year") int year,
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
             Principal principal) {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);

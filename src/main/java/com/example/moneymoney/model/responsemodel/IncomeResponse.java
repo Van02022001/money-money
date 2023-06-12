@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IncomeResponse {
-    private int id;
+    private Long id;
     private String incomeCategoryName;
     private Timestamp date;
     private BigDecimal amount;
