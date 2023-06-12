@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -94,6 +97,75 @@ public class ProfitServiceImpl implements ProfitService {
         BigDecimal totalExpense = expenseRepository.getTotalAmountByMonth(currentYear,loggedInUser);
         totalIncome = (totalIncome != null) ? totalIncome : BigDecimal.ZERO;
         totalExpense = (totalExpense != null) ? totalExpense : BigDecimal.ZERO;
+        return totalIncome.subtract(totalExpense);
+    }
+
+    @Override
+    public BigDecimal getStartingBalanceOfMonth(User loggedInUser , int month, int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, month, 1).with(TemporalAdjusters.firstDayOfMonth()).minusMonths(1);
+
+        BigDecimal totalProfit = BigDecimal.ZERO;
+        for (int m = 1; m < month; m++) {
+            LocalDate monthStart = LocalDate.of(year, m, 1);
+            LocalDate monthEnd = monthStart.with(TemporalAdjusters.lastDayOfMonth());
+
+            BigDecimal profit = getTotalProfitByDateRange(monthStart, monthEnd, loggedInUser);
+            totalProfit = totalProfit.add(profit);
+        }
+
+        return totalProfit;
+    }
+
+    @Override
+    public BigDecimal getTotalProfitByDateRange(LocalDate  startDate, LocalDate   endDate, User loggedInUser) {
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atStartOfDay().plusDays(1));
+
+        BigDecimal totalIncome = incomeRepository.getTotalIncomeByDateRange(startTimestamp, endTimestamp, loggedInUser);
+        BigDecimal totalExpense = expenseRepository.getTotalExpenseByDateRange(startTimestamp, endTimestamp, loggedInUser);
+
+        totalIncome = (totalIncome != null) ? totalIncome : BigDecimal.ZERO;
+        totalExpense = (totalExpense != null) ? totalExpense : BigDecimal.ZERO;
+
+        return totalIncome.subtract(totalExpense);
+    }
+
+
+    @Override
+    public BigDecimal getStartingBalanceOfYear(int year, User loggedInUser) {
+        BigDecimal totalProfit = BigDecimal.ZERO;
+
+        for (int y = 1900; y < year; y++) {
+            BigDecimal profit = getProfitByYears(y , loggedInUser);
+            totalProfit = totalProfit.add(profit);
+        }
+
+        return totalProfit;
+    }
+
+    private BigDecimal getProfitByYears(int year, User loggedInUser) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+
+        return getTotalProfitByDateRange(startDate, endDate, loggedInUser);
+    }
+
+
+    @Override
+    public BigDecimal getProfitOfMonth(User loggedInUser, int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atStartOfDay().plusDays(1));
+
+        BigDecimal totalIncome = incomeRepository.getTotalIncomeByDateRange(startTimestamp, endTimestamp, loggedInUser);
+        BigDecimal totalExpense = expenseRepository.getTotalExpenseByDateRange(startTimestamp, endTimestamp, loggedInUser);
+
+        totalIncome = (totalIncome != null) ? totalIncome : BigDecimal.ZERO;
+        totalExpense = (totalExpense != null) ? totalExpense : BigDecimal.ZERO;
+
         return totalIncome.subtract(totalExpense);
     }
 

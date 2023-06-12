@@ -85,6 +85,19 @@ public class IncomeController {
 //                .collect(Collectors.toList());
         return ResponseEntity.ok(expenseResponses);
     }
+    @GetMapping("/{month}/{year}")
+    @Operation(summary = "For getting list of incomes by month and year")
+    public ResponseEntity<List<IncomeResponse>> getListIncomeByMonthAndYear(
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+        List<Income> incomes = incomeService.getListIncomeByMonthAndYear(loggedInUser, month, year);
+        ModelMapper modelMapper = new ModelMapper();
+        List<IncomeResponse> incomeResponses = modelMapper.map(incomes, new TypeToken<List<IncomeResponse>>() {}.getType());
+        return ResponseEntity.ok(incomeResponses);
+    }
 
 
     private IncomeResponse mapToIncomeResponse(Income income) {
@@ -169,6 +182,20 @@ public class IncomeController {
         BigDecimal totalAmount = incomeService.getTotalAmountByYears(loggedInUser);
         return ResponseEntity.ok(totalAmount);
     }
+
+
+    @GetMapping("/total/{month}/{year}")
+    @Operation(summary = "Get total income's amount by month")
+    public ResponseEntity<BigDecimal> getTotalIncomeByMonth(
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+        BigDecimal totalAmount = incomeService.getTotalIncomeByMonths(loggedInUser, month, year);
+        return ResponseEntity.ok(totalAmount);
+    }
+
 
 
 

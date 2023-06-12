@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +38,16 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     BigDecimal getTotalAmountByYear(@Param("year") int year, @Param("loggedInUser") User loggedInUser);
 
 
+    @Query("SELECT COALESCE(SUM(i.amount), 0) FROM Income i WHERE i.date BETWEEN :startDate AND :endDate AND i.user = :loggedInUser")
+    BigDecimal getTotalIncomeByDateRange(@Param("startDate") Timestamp startDate, @Param("endDate") Timestamp  endDate, @Param("loggedInUser") User loggedInUser);
+
+    @Query("SELECT COALESCE(SUM(i.amount), 0) FROM Income i WHERE i.date BETWEEN :startDate AND :endDate AND i.user = :loggedInUser")
+    BigDecimal getTotalAmountByDateRange(
+            @Param("startDate") Timestamp startDate,
+            @Param("endDate") Timestamp endDate,
+            @Param("loggedInUser") User loggedInUser);
+
+    List<Income> findAllByUserAndDateBetweenOrderByDateDesc(User user, LocalDate startDate, LocalDate endDate);
 
 
 

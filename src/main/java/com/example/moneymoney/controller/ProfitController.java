@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 
 @RestController
@@ -102,6 +104,60 @@ public class ProfitController {
         BigDecimal totalProfit = profitService.getTotalAmountByYears(loggedInUser);
         return ResponseEntity.ok(totalProfit);
     }
+
+    @GetMapping("/starting-balance-of-month")
+    @Operation(summary = "For getting the starting balance of a specific month")
+    public ResponseEntity<BigDecimal> getStartingBalanceOfMonth(
+            @RequestParam("month") int month,
+            @RequestParam("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+        BigDecimal startingBalance = profitService.getStartingBalanceOfMonth(loggedInUser, month, year);
+        return ResponseEntity.ok(startingBalance);
+    }
+
+    @GetMapping("/starting-balance-of-year")
+    @Operation(summary = "For getting the starting balance of a specific year")
+    public ResponseEntity<BigDecimal> getStartingBalanceOfYear(
+            @RequestParam("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+
+        BigDecimal startingBalance = profitService.getStartingBalanceOfYear(year, loggedInUser);
+
+        return ResponseEntity.ok(startingBalance);
+    }
+    @GetMapping("/ending-balance-of-month")
+    @Operation(summary = "For getting the ending balance of a specific month")
+    public ResponseEntity<BigDecimal> getEndingBalanceOfMonth(
+            @RequestParam("month") int month,
+            @RequestParam("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+
+        BigDecimal startingBalance = profitService.getStartingBalanceOfMonth(loggedInUser, month, year);
+        BigDecimal profit = profitService.getProfitOfMonth(loggedInUser, month, year);
+        BigDecimal endingBalance = startingBalance.add(profit);
+
+        return ResponseEntity.ok(endingBalance);
+    }
+
+    @GetMapping("/profit-of-month")
+    @Operation(summary = "Get the profit of a specific month")
+    public ResponseEntity<BigDecimal> getProfitOfMonth(
+            @RequestParam("month") int month,
+            @RequestParam("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+        BigDecimal profitOfMonth = profitService.getProfitOfMonth(loggedInUser, month, year);
+        return ResponseEntity.ok(profitOfMonth);
+    }
+
+
 
 
 

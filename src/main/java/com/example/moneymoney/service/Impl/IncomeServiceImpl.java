@@ -17,6 +17,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -178,7 +181,12 @@ public class IncomeServiceImpl implements IncomeService {
         return incomeRepository.findAllByUserOrderByDateDesc(loggedInUser);
     }
 
-
+    @Override
+    public List<Income> getListIncomeByMonthAndYear(User loggedInUser, int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+        return incomeRepository.findAllByUserAndDateBetweenOrderByDateDesc(loggedInUser, startDate, endDate);
+    }
 
 
 
@@ -227,4 +235,17 @@ public class IncomeServiceImpl implements IncomeService {
         int currentYear = calendar.get(Calendar.YEAR);
         return incomeRepository.getTotalAmountByYear(currentYear, loggedInUser);
     }
+
+
+    @Override
+    public BigDecimal getTotalIncomeByMonths(User loggedInUser, int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atStartOfDay().plusDays(1));
+
+        return incomeRepository.getTotalAmountByDateRange(startTimestamp, endTimestamp, loggedInUser);
+    }
+
 }

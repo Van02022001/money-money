@@ -1,9 +1,6 @@
 package com.example.moneymoney.service;
 
-import com.example.moneymoney.entity.Asset;
-import com.example.moneymoney.entity.Expense;
-import com.example.moneymoney.entity.ExpenseCategory;
-import com.example.moneymoney.entity.User;
+import com.example.moneymoney.entity.*;
 import com.example.moneymoney.model.requestmodel.ExpenseRequestModel;
 import com.example.moneymoney.model.responsemodel.ExpenseResponse;
 import com.example.moneymoney.utils.ResponseObject;
@@ -25,6 +22,9 @@ public interface ExpenseService {
 
     List<Expense> getListExpense(User loggedInUser);
 
+    List<Expense> getListExpenseByMonthAndYear(User loggedInUser, int month, int year);
+
+
     BigDecimal getTotalAmountByDay(Date date, User loggedInUser);
 
     BigDecimal getTotalAmountByWeek(Date date, User loggedInUser);
@@ -37,5 +37,8 @@ public interface ExpenseService {
     BigDecimal getTotalAmountByWeeks(User loggedInUser);
     BigDecimal getTotalAmountByMonths(User loggedInUser);
     BigDecimal getTotalAmountByYears(User loggedInUser);
+
+
+    BigDecimal getTotalExpensesByMonths(User loggedInUser, int month, int year);
 
 }

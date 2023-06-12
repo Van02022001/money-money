@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
@@ -181,7 +184,16 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRepository.findAllByUser(loggedInUser);
     }
 
+    @Override
+    public List<Expense> getListExpenseByMonthAndYear(User loggedInUser, int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
 
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atStartOfDay().plusDays(1));
+
+        return expenseRepository.findAllByUserAndDateBetweenOrderByDateDesc(loggedInUser, startTimestamp, endTimestamp);
+    }
     @Override
     public BigDecimal getTotalAmountByDay(Date date, User loggedInUser) {
         return expenseRepository.getTotalAmountByDay(date,loggedInUser);
@@ -227,5 +239,17 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRepository.getTotalAmountByYear(currentYear, loggedInUser);
     }
 
+
+
+    @Override
+    public BigDecimal getTotalExpensesByMonths(User loggedInUser, int month, int year) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.with(TemporalAdjusters.lastDayOfMonth());
+
+        Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+        Timestamp endTimestamp = Timestamp.valueOf(endDate.atStartOfDay().plusDays(1));
+
+        return expenseRepository.getTotalAmountByDateRange(startTimestamp, endTimestamp, loggedInUser);
+    }
 
 }

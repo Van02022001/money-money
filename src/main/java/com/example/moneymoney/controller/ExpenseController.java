@@ -84,6 +84,24 @@ public class ExpenseController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(expenseResponses);
     }
+    @GetMapping("/total/{month}/{year}")
+    @Operation(summary = "Get list of expenses by month and year")
+    public ResponseEntity<List<ExpenseResponse>> getListExpenseByMonthAndYear(
+            @PathVariable("month") int month,
+            @PathVariable("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+
+        List<Expense> expenses = expenseService.getListExpenseByMonthAndYear(loggedInUser, month, year);
+
+        List<ExpenseResponse> expenseResponses = expenses.stream()
+                .map(this::mapToExpenseResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(expenseResponses);
+    }
+
 
     private ExpenseResponse mapToExpenseResponse(Expense expense) {
         ExpenseResponse expenseResponse = new ExpenseResponse();
@@ -165,6 +183,20 @@ public class ExpenseController {
         String username = principal.getName();
         User loggedInUser = userService.findUserByEmail(username);
         BigDecimal totalAmount = expenseService.getTotalAmountByYears(loggedInUser);
+        return ResponseEntity.ok(totalAmount);
+    }
+
+
+    @GetMapping("/total-expenses-by-month")
+    @Operation(summary = "For getting total expense's amount by month")
+    public ResponseEntity<BigDecimal> getTotalAmountByMonth(
+            @RequestParam("month") int month,
+            @RequestParam("year") int year,
+            Principal principal) {
+        String username = principal.getName();
+        User loggedInUser = userService.findUserByEmail(username);
+
+        BigDecimal totalAmount = expenseService.getTotalExpensesByMonths(loggedInUser, month, year);
         return ResponseEntity.ok(totalAmount);
     }
 

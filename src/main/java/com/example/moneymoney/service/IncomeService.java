@@ -22,7 +22,7 @@ public interface IncomeService {
 
     List<Income> getListIncome(User loggedInUser);
 
-
+    List<Income> getListIncomeByMonthAndYear(User loggedInUser, int month, int year);
     BigDecimal getTotalAmountByDay(Date date, User loggedInUser);
 
     BigDecimal getTotalAmountByWeek(Date date, User loggedInUser);
@@ -37,4 +37,7 @@ public interface IncomeService {
     BigDecimal getTotalAmountByWeeks(User loggedInUser);
     BigDecimal getTotalAmountByMonths(User loggedInUser);
     BigDecimal getTotalAmountByYears(User loggedInUser);
+
+
+    BigDecimal getTotalIncomeByMonths(User loggedInUser, int month, int year);
 }
