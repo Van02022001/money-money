@@ -28,4 +28,7 @@ public class PremiumSubscription {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "package_type")
+    private String packageType;
 }

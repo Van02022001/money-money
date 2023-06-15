@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 
 @Data
 public class PurchasePremiumRequest {
-
-    private Long assetId;
-
-    private BigDecimal premiumPrice;
+    @NotNull
+    private String packageType;
 }

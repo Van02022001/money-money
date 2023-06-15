@@ -34,6 +34,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Calendar;
@@ -254,43 +255,70 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, User loggedInUser) {
-        // Validate purchasePremiumRequest và xử lý logic mua gói Premium
-        User user = userRepository.findUserByEmail(loggedInUser.getEmail());
+    public PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, java.security.Principal principal) {
+        String username = principal.getName();
+        User user = userRepository.findUserByEmail(username);
 
         if (user.getPremiumSubscription() != null && user.getPremiumSubscription().getEndDate().isAfter(LocalDateTime.now())) {
-            return new PurchaseResult(HttpStatus.OK.toString(), "already_premium");
+            return new PurchaseResult(HttpStatus.OK.toString(), "already_premium" );
         }
 
-        Asset asset = assetRepository.findAssetByAssetId(purchasePremiumRequest.getAssetId());
+        BigDecimal premiumPrice;
+        String paymentQRCodeUrl;
+        String packageType = purchasePremiumRequest.getPackageType();
 
-        if (asset == null) {
-            return new PurchaseResult(HttpStatus.OK.toString(), "asset_not_found");
+        if ("1-month".equalsIgnoreCase(packageType)) {
+            premiumPrice = new BigDecimal("24999");
+            paymentQRCodeUrl = generatePaymentQRCodeUrl(packageType);
+        } else if ("6-months".equalsIgnoreCase(packageType)) {
+            premiumPrice = new BigDecimal("125000");
+            paymentQRCodeUrl = generatePaymentQRCodeUrl(packageType);
+        } else if ("1-year".equalsIgnoreCase(packageType)) {
+            premiumPrice = new BigDecimal("225000");
+            paymentQRCodeUrl = generatePaymentQRCodeUrl(packageType);
+        } else {
+            return new PurchaseResult(HttpStatus.BAD_REQUEST.toString(), "invalid_package_type" );
         }
 
-        UserAsset userAsset = userAssetRepository.findUserAssetByUserAndAsset(user, asset);
+        PremiumSubscription premiumSubscription = createPremiumSubscription(user, packageType);
+        premiumSubscriptionRepository.save(premiumSubscription);
 
-        if (userAsset == null || userAsset.getValue().compareTo(purchasePremiumRequest.getPremiumPrice()) < 0) {
-            return new PurchaseResult(HttpStatus.OK.toString(), "insufficient_funds");
+        PurchaseResult purchaseResult = new PurchaseResult(HttpStatus.ACCEPTED.toString(), "Please proceed to payment.");
+        purchaseResult.setPaymentQRCodeUrl(paymentQRCodeUrl);
+
+        return purchaseResult;
+    }
+    private String generatePaymentQRCodeUrl(String packageType) {
+        if ("1-month".equalsIgnoreCase(packageType)) {
+            return "/image/qrcode_1_month.jpg";
+        } else if ("6-months".equalsIgnoreCase(packageType)) {
+            return "/image/qrcode_6_month.jpg";
+        } else if ("1-year".equalsIgnoreCase(packageType)) {
+            return "/image/qrcode_1_year.jpg";
+        } else {
+            return "";
         }
+    }
 
-        // Trừ số tiền trong userAsset
-        userAsset.setValue(userAsset.getValue().subtract(purchasePremiumRequest.getPremiumPrice()));
-        userAssetRepository.save(userAsset);
-
-        // Tạo mới PremiumSubscription
+    private PremiumSubscription createPremiumSubscription(User user, String packageType) {
         LocalDateTime startDate = LocalDateTime.now();
-        LocalDateTime endDate = startDate.plusMonths(1);
-        PremiumSubscription premiumSubscription = PremiumSubscription.builder()
+        LocalDateTime endDate;
+
+        if ("1-month".equalsIgnoreCase(packageType)) {
+            endDate = startDate.plusMonths(1);
+        } else if ("6-months".equalsIgnoreCase(packageType)) {
+            endDate = startDate.plusMonths(6).plusMonths(1);
+        } else {
+            endDate = startDate.plusYears(1).plusMonths(3);
+        }
+
+        return PremiumSubscription.builder()
                 .startDate(startDate)
                 .endDate(endDate)
                 .user(user)
+                .packageType(packageType)
                 .build();
-        premiumSubscriptionRepository.save(premiumSubscription);
-
-        return new PurchaseResult(HttpStatus.ACCEPTED.toString(), "purchase_success");
     }
-
     @Override
     public boolean isPremiumUser(User user) {
         PremiumSubscription premiumSubscription = user.getPremiumSubscription();

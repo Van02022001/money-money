@@ -8,6 +8,7 @@ import com.example.moneymoney.utils.ResponseObject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 
+import java.security.Principal;
 import java.util.Optional;
 
 public interface UserService {
@@ -43,6 +44,6 @@ public interface UserService {
     User findUserById(Long id);
 
 
-    PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, User loggedInUser);
+    PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, Principal principal);
     boolean isPremiumUser(User user);
 }
