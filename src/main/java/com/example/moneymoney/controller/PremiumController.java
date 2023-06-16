@@ -1,8 +1,11 @@
 package com.example.moneymoney.controller;
 
+import com.example.moneymoney.entity.PremiumSubscription;
 import com.example.moneymoney.entity.User;
 import com.example.moneymoney.model.requestmodel.PurchasePremiumRequest;
+import com.example.moneymoney.model.responsemodel.PremiumHistory;
 import com.example.moneymoney.model.responsemodel.PurchaseResult;
+import com.example.moneymoney.repository.PremiumSubscriptionRepository;
 import com.example.moneymoney.service.UserService;
 import com.example.moneymoney.utils.ResponseObject;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +17,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/money-money/users/premiums")
@@ -22,6 +27,7 @@ import java.security.Principal;
 public class PremiumController {
     private final UserService userService;
 
+    private final PremiumSubscriptionRepository premiumSubscriptionRepository;
 
 @PostMapping("/purchase")
 @Operation(summary = "Purchase Premium")
@@ -40,6 +46,33 @@ public ResponseEntity<PurchaseResult> purchasePremium(@RequestBody PurchasePremi
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(purchaseResult);
     }
 }
+
+    @GetMapping("/premium-history")
+    public ResponseEntity<List<PremiumHistory>> getPremiumHistory(Principal principal) {
+        // Lấy thông tin người dùng từ Principal hoặc thông tin xác thực khác
+        String username = principal.getName();
+        User user = userService.findUserByEmail(username);
+
+        // Kiểm tra người dùng và lấy lịch sử mua premium
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<PremiumSubscription> premiumHistory = premiumSubscriptionRepository.findByUser(user);
+
+        // Chuyển đổi lịch sử mua premium thành định dạng JSON response
+        List<PremiumHistory> response = new ArrayList<>();
+        for (PremiumSubscription subscription : premiumHistory) {
+            PremiumHistory history = new PremiumHistory(
+                    subscription.getStartDate(),
+                    subscription.getEndDate(),
+                    subscription.getPackageType()
+            );
+            response.add(history);
+        }
+
+        return ResponseEntity.ok(response);
+    }
 
 
 }
