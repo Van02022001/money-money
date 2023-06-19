@@ -3,7 +3,9 @@ package com.example.moneymoney.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,16 +21,26 @@ public class PremiumSubscription {
     @Column(name = "subscription_id")
     private Long id;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
-
-    @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     @Column(name = "package_type")
-    private String packageType;
+    private String packageName;
+
+    @Column(name = "unit_price")
+    private BigDecimal unitPrice;
+
+
+    @Column(name = "unit_stock")
+    private int unitStock;
+
+    @Column(name = "durian_in_months")
+    private int durationInMonths;
+
+
+    @Column(name = "status")
+    private boolean status;
+
+
+
+    @OneToMany(mappedBy = "premiumSubscription", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
+
 }

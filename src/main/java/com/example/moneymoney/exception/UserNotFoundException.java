@@ -7,4 +7,6 @@ public class UserNotFoundException extends UsernameNotFoundException {
     public UserNotFoundException(String email, String message) {
         super(String.format("Failed for [%s]: %s", email, message));
     }
+
+
 }

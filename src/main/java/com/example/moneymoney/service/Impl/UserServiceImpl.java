@@ -70,9 +70,9 @@ public class UserServiceImpl implements UserService {
     private RefreshTokenProvider refreshTokenProvider;
 
 
-    private final UserAssetRepository userAssetRepository;
+
     private final AuthenticationManager authenticationManager;
-    private final PremiumSubscriptionRepository premiumSubscriptionRepository;
+
     @Autowired
     CacheManager cacheManager;
     @Override
@@ -254,76 +254,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findUserById(id);
     }
 
-    @Override
-    public PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, java.security.Principal principal) {
-        String username = principal.getName();
-        User user = userRepository.findUserByEmail(username);
 
-        if (user.getPremiumSubscription() != null && user.getPremiumSubscription().getEndDate().isAfter(LocalDateTime.now())) {
-            return new PurchaseResult(HttpStatus.OK.toString(), "already_premium" );
-        }
-
-        BigDecimal premiumPrice;
-        String paymentQRCodeUrl;
-        String packageType = purchasePremiumRequest.getPackageType();
-
-        if ("1-month".equalsIgnoreCase(packageType)) {
-            premiumPrice = new BigDecimal("24999");
-            paymentQRCodeUrl = generatePaymentQRCodeUrl(packageType);
-        } else if ("6-months".equalsIgnoreCase(packageType)) {
-            premiumPrice = new BigDecimal("125000");
-            paymentQRCodeUrl = generatePaymentQRCodeUrl(packageType);
-        } else if ("1-year".equalsIgnoreCase(packageType)) {
-            premiumPrice = new BigDecimal("225000");
-            paymentQRCodeUrl = generatePaymentQRCodeUrl(packageType);
-        } else {
-            return new PurchaseResult(HttpStatus.BAD_REQUEST.toString(), "invalid_package_type" );
-        }
-
-        PremiumSubscription premiumSubscription = createPremiumSubscription(user, packageType);
-        premiumSubscriptionRepository.save(premiumSubscription);
-
-        PurchaseResult purchaseResult = new PurchaseResult(HttpStatus.ACCEPTED.toString(), "Please proceed to payment.");
-        purchaseResult.setPaymentQRCodeUrl(paymentQRCodeUrl);
-
-        return purchaseResult;
-    }
-    private String generatePaymentQRCodeUrl(String packageType) {
-        if ("1-month".equalsIgnoreCase(packageType)) {
-            return "/image/qrcode_1_month.jpg";
-        } else if ("6-months".equalsIgnoreCase(packageType)) {
-            return "/image/qrcode_6_month.jpg";
-        } else if ("1-year".equalsIgnoreCase(packageType)) {
-            return "/image/qrcode_1_year.jpg";
-        } else {
-            return "";
-        }
-    }
-
-    private PremiumSubscription createPremiumSubscription(User user, String packageType) {
-        LocalDateTime startDate = LocalDateTime.now();
-        LocalDateTime endDate;
-
-        if ("1-month".equalsIgnoreCase(packageType)) {
-            endDate = startDate.plusMonths(1);
-        } else if ("6-months".equalsIgnoreCase(packageType)) {
-            endDate = startDate.plusMonths(6).plusMonths(1);
-        } else {
-            endDate = startDate.plusYears(1).plusMonths(3);
-        }
-
-        return PremiumSubscription.builder()
-                .startDate(startDate)
-                .endDate(endDate)
-                .user(user)
-                .packageType(packageType)
-                .build();
-    }
-    @Override
-    public boolean isPremiumUser(User user) {
-        PremiumSubscription premiumSubscription = user.getPremiumSubscription();
-        return premiumSubscription != null && premiumSubscription.getEndDate().isAfter(LocalDateTime.now());
-    }
 
 
     private void clearRefreshTokenCache(String refreshToken) {

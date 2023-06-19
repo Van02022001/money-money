@@ -11,4 +11,5 @@ public interface UserAssetRepository extends JpaRepository<UserAsset, Long> {
     UserAsset findUserAssetByUserAndAsset(User user, Asset asset);
 
     UserAsset save(UserAsset userAsset);
+    UserAsset findByUser(User user);
 }

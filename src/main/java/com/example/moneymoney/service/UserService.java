@@ -44,6 +44,5 @@ public interface UserService {
     User findUserById(Long id);
 
 
-    PurchaseResult purchasePremium(PurchasePremiumRequest purchasePremiumRequest, Principal principal);
-    boolean isPremiumUser(User user);
+
 }

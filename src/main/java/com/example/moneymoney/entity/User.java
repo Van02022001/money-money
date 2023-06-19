@@ -47,8 +47,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserAsset> userAssets;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private PremiumSubscription premiumSubscription;
+
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -56,4 +55,7 @@ public class User {
 
 
     private String providerId;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Order> orders;
 }
