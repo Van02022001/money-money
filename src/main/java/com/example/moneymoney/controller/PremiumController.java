@@ -153,6 +153,28 @@ public class PremiumController {
         }
     }
 
+    @RequestMapping(value = "/api/orders/history", method = RequestMethod.GET)
+    public ResponseEntity<?> getOrderHistory(Principal principal) {
+        try {
+            // Xác định người dùng từ thông tin đăng nhập hoặc token
+            String username = principal.getName();
+            User user = userService.findUserByEmail(username);
+
+            // Lấy danh sách đơn hàng của người dùng từ cơ sở dữ liệu
+            List<Order> orderList = orderRepository.findOrdersByUser(user);
+
+            // Chuyển đổi đối tượng Order sang DTO để trả về
+            List<OrderDTO> orderDTOList = new ArrayList<>();
+            for (Order order : orderList) {
+                OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
+                orderDTOList.add(orderDTO);
+            }
+
+            return ResponseEntity.ok(orderDTOList);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving order history.");
+        }
+    }
 
 
     private BigDecimal calculateTotalPrice(List<OrderDetail> orderDetails) {
